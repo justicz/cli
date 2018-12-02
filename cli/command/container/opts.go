@@ -116,6 +116,7 @@ type containerOptions struct {
 	healthStartPeriod  time.Duration
 	healthRetries      int
 	runtime            string
+	runtimeArgs        opts.ListOpts
 	autoRemove         bool
 	init               bool
 
@@ -151,6 +152,7 @@ func addFlags(flags *pflag.FlagSet) *containerOptions {
 		links:             opts.NewListOpts(opts.ValidateLink),
 		loggingOpts:       opts.NewListOpts(nil),
 		publish:           opts.NewListOpts(nil),
+		runtimeArgs:       opts.NewListOpts(nil),
 		securityOpt:       opts.NewListOpts(nil),
 		storageOpt:        opts.NewListOpts(nil),
 		sysctls:           opts.NewMapOpts(nil, opts.ValidateSysctl),
@@ -280,6 +282,7 @@ func addFlags(flags *pflag.FlagSet) *containerOptions {
 	flags.Var(&copts.shmSize, "shm-size", "Size of /dev/shm")
 	flags.StringVar(&copts.utsMode, "uts", "", "UTS namespace to use")
 	flags.StringVar(&copts.runtime, "runtime", "", "Runtime to use for this container")
+	flags.Var(&copts.runtimeArgs, "runtime-arg", "Additional argument to pass to the container runtime")
 
 	flags.BoolVar(&copts.init, "init", false, "Run an init inside the container that forwards signals and reaps processes")
 	flags.SetAnnotation("init", "version", []string{"1.25"})
@@ -613,6 +616,7 @@ func parse(flags *pflag.FlagSet, copts *containerOptions) (*containerConfig, err
 		Tmpfs:          tmpfs,
 		Sysctls:        copts.sysctls.GetAll(),
 		Runtime:        copts.runtime,
+		RuntimeArgs:    copts.runtimeArgs.GetAll(),
 		Mounts:         mounts,
 	}
 
